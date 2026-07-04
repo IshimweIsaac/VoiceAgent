@@ -60,14 +60,13 @@
  (Phone) (PSTN) (FastAPI) API (Charon)
 
 
-
  Tool Registry
 
- • lookup_faq SQLite (FAQ KB)
- • check_availability Google Calendar
- • book_appointment Google Calendar
- • send_sms_confirmation Twilio SMS
- • transfer_to_human PSTN Transfer
+ * lookup_faq SQLite (FAQ KB)
+ * check_availability Google Calendar
+ * book_appointment Google Calendar
+ * send_sms_confirmation Twilio SMS
+ * transfer_to_human PSTN Transfer
 
 ```
 
