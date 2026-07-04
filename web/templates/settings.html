@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Settings</h1>
+  <p>Configure your AI receptionist's behavior and business details.</p>
+</div>
+
+<div class="card" style="max-width:700px;">
+  <form method="POST" action="/dashboard/settings">
+    <div class="form-group">
+      <label for="name">Business Name</label>
+      <input type="text" id="name" name="name" value="{{ business.name }}" required>
+    </div>
+
+    <div class="form-group">
+      <label for="greeting_message">Greeting Message</label>
+      <textarea id="greeting_message" name="greeting_message" rows="3">{{ business.greeting_message }}</textarea>
+      <div class="help-text">
+        Use <code>{business_name}</code> as a placeholder for your business name.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="timezone">Timezone</label>
+      <select id="timezone" name="timezone">
+        <option value="America/New_York" {{ 'selected' if business.timezone == 'America/New_York' }}>Eastern (America/New_York)</option>
+        <option value="America/Chicago" {{ 'selected' if business.timezone == 'America/Chicago' }}>Central (America/Chicago)</option>
+        <option value="America/Denver" {{ 'selected' if business.timezone == 'America/Denver' }}>Mountain (America/Denver)</option>
+        <option value="America/Los_Angeles" {{ 'selected' if business.timezone == 'America/Los_Angeles' }}>Pacific (America/Los_Angeles)</option>
+        <option value="America/Anchorage" {{ 'selected' if business.timezone == 'America/Anchorage' }}>Alaska (America/Anchorage)</option>
+        <option value="Pacific/Honolulu" {{ 'selected' if business.timezone == 'Pacific/Honolulu' }}>Hawaii (Pacific/Honolulu)</option>
+        <option value="Europe/London" {{ 'selected' if business.timezone == 'Europe/London' }}>London (Europe/London)</option>
+        <option value="Europe/Paris" {{ 'selected' if business.timezone == 'Europe/Paris' }}>Central Europe (Europe/Paris)</option>
+        <option value="Africa/Kigali" {{ 'selected' if business.timezone == 'Africa/Kigali' }}>Central Africa (Africa/Kigali)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="business_hours">Business Hours (JSON)</label>
+      <textarea id="business_hours" name="business_hours" rows="6" 
+        placeholder='{"monday":{"open":"09:00","close":"17:00"},"tuesday":{"open":"09:00","close":"17:00"}}'>{{ business.business_hours | tojson(indent=2) if business.business_hours else '' }}</textarea>
+      <div class="help-text">
+        JSON object with days as keys. Format: <code>{"day": {"open": "HH:MM", "close": "HH:MM"}}</code>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="transfer_phone_number">Transfer Phone Number</label>
+      <input type="tel" id="transfer_phone_number" name="transfer_phone_number" 
+             value="{{ business.transfer_phone_number or '' }}" 
+             placeholder="+12025551234">
+      <div class="help-text">
+        Calls are transferred here when the caller asks for a human. E.164 format.
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Save Settings</button>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

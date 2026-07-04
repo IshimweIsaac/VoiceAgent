@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}FAQs{% endblock %}
+{% block content %}
+
+<div class="page-header flex flex-between">
+  <div>
+    <h1>FAQs</h1>
+    <p>Manage your knowledge base. The AI uses these to answer caller questions.</p>
+  </div>
+</div>
+
+<!-- Add FAQ Form -->
+<div class="card" style="max-width:700px;margin-bottom:1.5rem;">
+  <h2 style="font-size:1rem;font-weight:600;margin-bottom:1rem;">Add FAQ Entry</h2>
+  <form method="POST" action="/dashboard/faqs/add">
+    <div class="form-group">
+      <label for="question">Question</label>
+      <input type="text" id="question" name="question" 
+             placeholder="e.g., What are your business hours?" required>
+    </div>
+    <div class="form-group">
+      <label for="answer">Answer</label>
+      <textarea id="answer" name="answer" rows="3" 
+                placeholder="e.g., We're open Monday through Friday, 9 AM to 5 PM." required></textarea>
+    </div>
+    <div class="flex gap-1">
+      <div class="form-group" style="flex:1;">
+        <label for="category">Category</label>
+        <input type="text" id="category" name="category" placeholder="general" value="general">
+      </div>
+      <div class="form-group" style="flex:1;">
+        <label for="keywords">Keywords</label>
+        <input type="text" id="keywords" name="keywords" placeholder="hours, open, schedule">
+        <div class="help-text">Comma-separated keywords for matching</div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Add FAQ</button>
+    </div>
+  </form>
+</div>
+
+<!-- FAQ List -->
+{% if faqs %}
+<div class="table-container">
+  <table>
+    <thead>
+      <tr>
+        <th style="width:30%;">Question</th>
+        <th style="width:35%;">Answer</th>
+        <th>Category</th>
+        <th style="width:140px;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for faq in faqs %}
+      <tr>
+        <td><strong>{{ faq.question }}</strong></td>
+        <td class="text-muted text-sm">{{ faq.answer[:120] }}{% if faq.answer|length > 120 %}...{% endif %}</td>
+        <td><span class="badge badge-info">{{ faq.category }}</span></td>
+        <td>
+          <div class="flex gap-1">
+            <button class="btn btn-sm btn-outline" 
+                    onclick="editFaq({{ faq.id }})">Edit</button>
+            <form method="POST" action="/dashboard/faqs/{{ faq.id }}/delete" 
+                  onsubmit="return confirm('Delete this FAQ entry?')">
+              <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      <!-- Edit form (hidden, shown inline when Edit is clicked) -->
+      <tr id="edit-faq-{{ faq.id }}" style="display:none;">
+        <td colspan="4" style="background:#f8fafc;padding:1rem;">
+          <form method="POST" action="/dashboard/faqs/{{ faq.id }}/edit">
+            <div class="form-group">
+              <label for="edit_question_{{ faq.id }}">Question</label>
+              <input type="text" id="edit_question_{{ faq.id }}" name="question" 
+                     value="{{ faq.question }}" required>
+            </div>
+            <div class="form-group">
+              <label for="edit_answer_{{ faq.id }}">Answer</label>
+              <textarea id="edit_answer_{{ faq.id }}" name="answer" rows="3" required>{{ faq.answer }}</textarea>
+            </div>
+            <div class="flex gap-1">
+              <div class="form-group" style="flex:1;">
+                <label for="edit_category_{{ faq.id }}">Category</label>
+                <input type="text" id="edit_category_{{ faq.id }}" name="category" value="{{ faq.category }}">
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="edit_keywords_{{ faq.id }}">Keywords</label>
+                <input type="text" id="edit_keywords_{{ faq.id }}" name="keywords" value="{{ faq.keywords }}">
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn btn-sm btn-primary">Save</button>
+              <button type="button" class="btn btn-sm btn-outline" 
+                      onclick="cancelEdit({{ faq.id }})">Cancel</button>
+            </div>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card empty-state">
+  <p>No FAQ entries yet.</p>
+  <p class="sub">Add your first FAQ above to help the AI answer customer questions.</p>
+</div>
+{% endif %}
+
+<script>
+function editFaq(id) {
+  document.getElementById('edit-faq-' + id).style.display = 'table-row';
+}
+
+function cancelEdit(id) {
+  document.getElementById('edit-faq-' + id).style.display = 'none';
+}
+</script>
+
+{% endblock %}

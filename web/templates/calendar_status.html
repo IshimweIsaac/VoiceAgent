@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Calendar{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>Calendar Integration</h1>
+  <p>Connect Google Calendar to let the AI check availability and book appointments.</p>
+</div>
+
+<div class="card status-card" style="max-width:500px;">
+  {% if connected %}
+  <div class="status-icon">&#9989;</div>
+  <div class="status-label" style="color:#16a34a;">Calendar Connected</div>
+  <p class="status-description">
+    Your Google Calendar is linked. The AI can check availability and book appointments
+    on your behalf.
+  </p>
+  <div class="flex gap-1" style="justify-content:center;">
+    <span class="badge badge-success" style="font-size:0.85rem;padding:0.3rem 0.75rem;">
+      Calendar: {{ business.google_calendar_id or 'primary' }}
+    </span>
+  </div>
+  {% else %}
+  <div class="status-icon">&#128197;</div>
+  <div class="status-label">Calendar Not Connected</div>
+  <p class="status-description">
+    Connect your Google Calendar to enable the AI to:
+  </p>
+  <ul style="text-align:left;margin-bottom:1.5rem;color:var(--text-secondary);font-size:0.9rem;line-height:1.8;">
+    <li>Check real-time availability</li>
+    <li>Book appointments automatically</li>
+    <li>Avoid double-booking conflicts</li>
+    <li>Send SMS confirmations with event details</li>
+  </ul>
+  <a href="/dashboard/calendar/auth" class="btn btn-primary">
+    Connect Google Calendar
+  </a>
+  {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VoiceAgent — {% block title %}Dashboard{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="logo">VoiceAgent</div>
+      <a href="/dashboard" class="{% if request.url.path == '/dashboard' %}active{% endif %}">
+        Overview
+      </a>
+      <a href="/dashboard/settings" class="{% if request.url.path == '/dashboard/settings' %}active{% endif %}">
+        Settings
+      </a>
+      <a href="/dashboard/faqs" class="{% if request.url.path == '/dashboard/faqs' %}active{% endif %}">
+        FAQs
+      </a>
+      <a href="/dashboard/calls" class="{% if request.url.path.startswith('/dashboard/calls') %}active{% endif %}">
+        Call History
+      </a>
+      <a href="/dashboard/calendar/status" class="{% if request.url.path == '/dashboard/calendar/status' %}active{% endif %}">
+        Calendar
+      </a>
+      <a href="/logout">Logout</a>
+    </nav>
+    <main class="content">
+      {% for msg in messages %}
+      <div class="alert alert-{{ msg.type }}">{{ msg.text }}</div>
+      {% endfor %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Overview{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <h1>{{ business.name }}</h1>
+  <p>Here's what's happening with your AI receptionist.</p>
+</div>
+
+<div class="stats-grid">
+  <div class="card">
+    <div class="card-label">Calls Today</div>
+    <div class="card-value">{{ calls_today }}</div>
+    <div class="card-sub">Inbound calls received today</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Appointments</div>
+    <div class="card-value">{{ appointments_booked }}</div>
+    <div class="card-sub">Total appointments booked</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">FAQs</div>
+    <div class="card-value">{{ faq_count }}</div>
+    <div class="card-sub">Knowledge base entries</div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Calendar</div>
+    <div class="card-value" style="font-size:1.25rem;margin-top:0.25rem;">
+      <span class="card-status {{ 'connected' if calendar_connected else 'disconnected' }}">
+        {{ "Connected" if calendar_connected else "Not connected" }}
+      </span>
+    </div>
+    <div class="card-sub">
+      {% if calendar_connected %}
+        Google Calendar is linked
+      {% else %}
+        <a href="/dashboard/calendar/status">Connect Google Calendar</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="flex flex-between" style="margin-bottom:1.5rem;">
+  <h2 style="font-size:1.1rem;font-weight:600;">Quick Links</h2>
+</div>
+
+<div class="flex gap-1" style="flex-wrap:wrap;">
+  <a href="/dashboard/settings" class="btn btn-primary">Configure Settings</a>
+  <a href="/dashboard/faqs" class="btn btn-outline">Manage FAQs</a>
+  <a href="/dashboard/calls" class="btn btn-outline">View Call History</a>
+</div>
+
+{% endblock %}

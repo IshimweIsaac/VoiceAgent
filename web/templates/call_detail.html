@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Call Detail{% endblock %}
+{% block content %}
+
+<div class="page-header flex flex-between">
+  <div>
+    <h1>Call Detail</h1>
+    <p>Call from {{ call.caller_number }}</p>
+  </div>
+  <a href="/dashboard/calls" class="btn btn-outline">&larr; Back to Calls</a>
+</div>
+
+<!-- Call Metadata -->
+<div class="stats-grid" style="margin-bottom:1.5rem;">
+  <div class="card">
+    <div class="card-label">Caller</div>
+    <div class="card-value" style="font-size:1.1rem;">{{ call.caller_number }}</div>
+  </div>
+  <div class="card">
+    <div class="card-label">Date &amp; Time</div>
+    <div class="card-value" style="font-size:1.1rem;">
+      {{ call.created_at.strftime('%b %d, %Y %H:%M UTC') if call.created_at else '--' }}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-label">Duration</div>
+    <div class="card-value" style="font-size:1.1rem;">{{ call.duration_seconds }} seconds</div>
+  </div>
+  <div class="card">
+    <div class="card-label">Outcome</div>
+    <div>
+      {% set outcome_labels = {
+        "appointment_booked": "Appointment Booked",
+        "faq_answered": "FAQ Answered",
+        "transferred": "Transferred",
+        "hangup": "Hung Up",
+        "error": "Error",
+      } %}
+      {% set outcome_badges = {
+        "appointment_booked": "badge-success",
+        "faq_answered": "badge-info",
+        "transferred": "badge-warning",
+        "hangup": "",
+        "error": "badge-danger",
+      } %}
+      <span class="badge {{ outcome_badges.get(call.outcome, '') }}" style="font-size:0.85rem;padding:0.3rem 0.75rem;">
+        {{ outcome_labels.get(call.outcome, call.outcome) }}
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- Transcript -->
+{% if call.transcript_json %}
+<div class="page-header">
+  <h2 style="font-size:1.1rem;font-weight:600;">Transcript</h2>
+</div>
+<div class="transcript">
+  {% for entry in call.transcript_json %}
+  <div class="transcript-entry">
+    <div class="entry-role {{ 'caller' if entry.get('role') == 'caller' else '' }}">
+      {{ entry.get('role', 'unknown') | capitalize }}
+      {% if entry.get('timestamp_ms') %}
+      <span class="text-muted" style="font-weight:400;font-size:0.75rem;">
+        +{{ (entry.timestamp_ms / 1000) | round(1) }}s
+      </span>
+      {% endif %}
+    </div>
+    <div class="entry-text">{{ entry.get('text', '') }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">
+  <div class="empty-state" style="padding:1.5rem;">
+    <p>No transcript available for this call.</p>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
