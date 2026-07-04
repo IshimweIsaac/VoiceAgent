@@ -1,7 +1,7 @@
-# VoiceAgent — AI Phone Receptionist for Small Businesses
+# VoiceAgent -- AI Phone Receptionist for Small Businesses
 
 > A production-grade AI voice receptionist that answers inbound calls, books
-> appointments, answers business FAQs, and escalates to humans — powered by
+> appointments, answers business FAQs, and escalates to humans -- powered by
 > **Google Gemini Live API** and **Twilio**.
 
 [![Tests](https://img.shields.io/badge/tests-172%20passing-brightgreen)](#testing)
@@ -23,7 +23,7 @@
 | Capability | Detail |
 |---|---|
 | **Inbound Call Handling** | Twilio Media Streams WebSocket streams real-time audio from PSTN calls |
-| **Natural AI Voice** | Google Gemini Live API with Charon voice — sub-500ms response latency |
+| **Natural AI Voice** | Google Gemini Live API with Charon voice -- sub-500ms response latency |
 | **Appointment Booking** | Google Calendar API integration with availability checking and event creation |
 | **FAQ Knowledge Base** | Business owners upload Q&A pairs; the AI searches and answers from them |
 | **Human Escalation** | Transfers calls to a real person when the caller asks or the AI cannot help |
@@ -40,7 +40,7 @@
 |---|---|
 | **Backend Framework** | Python 3.11+, FastAPI, Uvicorn |
 | **AI Engine** | Google Gemini Live API (`gemini-3.1-flash-live-preview`) |
-| **Voice** | Charon — Gemini's natural, expressive voice |
+| **Voice** | Charon -- Gemini's natural, expressive voice |
 | **Telephony** | Twilio (Media Streams, SMS, PSTN) |
 | **Database** | SQLite via SQLAlchemy 2.0 (async) |
 | **Scheduling** | Google Calendar API (OAuth 2.0, encrypted token storage) |
@@ -55,39 +55,39 @@
 ## Architecture
 
 ```
-┌──────────┐     ┌──────────┐     ┌──────────────┐     ┌─────────────┐
-│  Caller   │────▶│  Twilio  │────▶│  VoiceAgent  │────▶│  Gemini Live│
-│ (Phone)   │◀───│ (PSTN)   │◀───│  (FastAPI)   │◀───│ API (Charon)│
-└──────────┘     └──────────┘     └──────┬───────┘     └─────────────┘
-                                          │
-                                 ┌────────┴────────┐
-                                 │   Tool Registry  │
-                                 │                  │
-                                 │  • lookup_faq    │──▶ SQLite (FAQ KB)
-                                 │  • check_availability  │──▶ Google Calendar
-                                 │  • book_appointment    │──▶ Google Calendar
-                                 │  • send_sms_confirmation│──▶ Twilio SMS
-                                 │  • transfer_to_human   │──▶ PSTN Transfer
-                                 └──────────────────┘
+
+ Caller Twilio VoiceAgent Gemini Live
+ (Phone) (PSTN) (FastAPI) API (Charon)
+
+
+
+ Tool Registry
+
+ • lookup_faq SQLite (FAQ KB)
+ • check_availability Google Calendar
+ • book_appointment Google Calendar
+ • send_sms_confirmation Twilio SMS
+ • transfer_to_human PSTN Transfer
+
 ```
 
 ### Call Flow
 
-1. **Inbound Call** — A customer dials the business's Twilio number.
-2. **Twilio Webhook** — Twilio POSTs to `/twilio/incoming`, which returns TwiML with a `<Connect><Stream>` directing the audio to VoiceAgent's WebSocket.
-3. **WebSocket Connection** — Twilio opens a Media Stream WebSocket at `/media/{business_slug}`. VoiceAgent looks up the business, creates a `CallManager`, and initializes a Gemini Live session.
-4. **Bidirectional Audio** — Caller audio flows: Twilio µ-law @ 8kHz → decode → resample to 16kHz PCM → Gemini Live API. Gemini responds with 24kHz PCM → resample to 8kHz → µ-law encode → Twilio.
-5. **Tool Execution** — When Gemini calls a tool (e.g., `book_appointment`), the `CallManager` dispatches it through the `ToolRegistry`. Results are streamed back to Gemini, which speaks them to the caller.
-6. **Call End** — On hangup, VoiceAgent records the transcript, outcome, and duration, then gracefully disconnects the Gemini session.
+1. **Inbound Call** -- A customer dials the business's Twilio number.
+2. **Twilio Webhook** -- Twilio POSTs to `/twilio/incoming`, which returns TwiML with a `<Connect><Stream>` directing the audio to VoiceAgent's WebSocket.
+3. **WebSocket Connection** -- Twilio opens a Media Stream WebSocket at `/media/{business_slug}`. VoiceAgent looks up the business, creates a `CallManager`, and initializes a Gemini Live session.
+4. **Bidirectional Audio** -- Caller audio flows: Twilio µ-law @ 8kHz → decode → resample to 16kHz PCM → Gemini Live API. Gemini responds with 24kHz PCM → resample to 8kHz → µ-law encode → Twilio.
+5. **Tool Execution** -- When Gemini calls a tool (e.g., `book_appointment`), the `CallManager` dispatches it through the `ToolRegistry`. Results are streamed back to Gemini, which speaks them to the caller.
+6. **Call End** -- On hangup, VoiceAgent records the transcript, outcome, and duration, then gracefully disconnects the Gemini session.
 
 ### Audio Pipeline
 
 ```
-TWILIO → Server:    µ-law @ 8kHz (base64) → PCM s16le @ 8kHz → resample → PCM @ 16kHz → Gemini
-Server → TWILIO:    Gemini PCM @ 24kHz → resample → PCM @ 8kHz → µ-law → base64 → Twilio media
+TWILIO → Server: µ-law @ 8kHz (base64) → PCM s16le @ 8kHz → resample → PCM @ 16kHz → Gemini
+Server → TWILIO: Gemini PCM @ 24kHz → resample → PCM @ 8kHz → µ-law → base64 → Twilio media
 ```
 
-The µ-law (G.711) codec is implemented from scratch using the standard algorithm — no external audio libraries beyond NumPy for linear resampling.
+The µ-law (G.711) codec is implemented from scratch using the standard algorithm -- no external audio libraries beyond NumPy for linear resampling.
 
 ---
 
@@ -129,14 +129,14 @@ Copy `.env.example` to `.env` and fill in all required values:
 
 | Variable | Required | Default | Description |
 |---|---|---|---|
-| `GEMINI_API_KEY` | Yes | — | Google Gemini API key |
-| `TWILIO_ACCOUNT_SID` | Yes | — | Twilio Account SID |
-| `TWILIO_AUTH_TOKEN` | Yes | — | Twilio Auth Token |
-| `SECRET_KEY` | Yes | — | 64-char random session secret |
-| `ENCRYPTION_KEY` | Yes | — | Fernet key for OAuth token encryption |
-| `GOOGLE_CLIENT_ID` | Calendar | — | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | Calendar | — | Google OAuth client secret |
-| `GOOGLE_REDIRECT_URI` | Calendar | — | OAuth callback URL |
+| `GEMINI_API_KEY` | Yes | -- | Google Gemini API key |
+| `TWILIO_ACCOUNT_SID` | Yes | -- | Twilio Account SID |
+| `TWILIO_AUTH_TOKEN` | Yes | -- | Twilio Auth Token |
+| `SECRET_KEY` | Yes | -- | 64-char random session secret |
+| `ENCRYPTION_KEY` | Yes | -- | Fernet key for OAuth token encryption |
+| `GOOGLE_CLIENT_ID` | Calendar | -- | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Calendar | -- | Google OAuth client secret |
+| `GOOGLE_REDIRECT_URI` | Calendar | -- | OAuth callback URL |
 | `HOST` | No | `0.0.0.0` | Server bind address |
 | `PORT` | No | `8000` | Server port |
 | `DATABASE_URL` | No | `sqlite+aiosqlite:///./voice_agent.db` | Database connection |
@@ -185,47 +185,47 @@ https://<your-ngrok-subdomain>.ngrok.app/twilio/incoming
 
 ```
 VoiceAgent/
-├── main.py                    # FastAPI entry point, lifespan, middleware
-├── setup.sh                   # One-click environment setup
-├── requirements.txt           # Python dependencies
-├── .env.example               # Environment variable template
-│
-├── voice_agent/               # Core application library
-│   ├── config.py              # Pydantic Settings (env var loading)
-│   ├── database.py            # Async SQLAlchemy engine + session management
-│   ├── models.py              # ORM: Business, User, FAQ, Call, Appointment
-│   ├── audio_converter.py     # µ-law ↔ PCM conversion (G.711 algorithm)
-│   ├── gemini_client.py       # Gemini Live API session handler
-│   ├── call_manager.py        # Per-call lifecycle orchestrator
-│   ├── twilio_handler.py      # Twilio HTTP webhooks + Media Stream WebSocket
-│   ├── twilio_client.py       # Async Twilio REST wrapper (SMS, calls)
-│   ├── google_calendar.py     # Google Calendar OAuth + availability + events
-│   ├── system_prompt.py       # Business-specific prompt builder
-│   ├── tool_registry.py       # Tool registration and dispatch system
-│   │
-│   └── tools/                 # Individual tools (auto-register on import)
-│       ├── appointment.py     # check_availability, book_appointment
-│       ├── faq.py             # lookup_faq — keyword-scored KB search
-│       ├── sms.py             # send_sms_confirmation
-│       └── transfer.py        # transfer_to_human
-│
-├── web/                       # Business owner web dashboard
-│   ├── auth.py                # Session auth (login, register, logout)
-│   ├── routes.py              # Dashboard routes (settings, FAQs, calls)
-│   ├── templates/             # Jinja2 HTML templates (9 pages)
-│   └── static/                # CSS stylesheets
-│
-├── tests/                     # Test suite
-│   ├── test_api.py            # API endpoint tests
-│   ├── test_audio_converter.py# µ-law/PCM conversion edge cases
-│   ├── test_call_manager.py   # Call lifecycle orchestration
-│   ├── test_gemini_client.py  # Gemini session management
-│   ├── test_models.py         # ORM model validation
-│   ├── test_system_prompt.py  # Prompt building logic
-│   ├── test_tool_registry.py  # Tool registration + dispatch
-│   └── test_tools.py          # Individual tool handlers
-│
-└── scripts/                   # Utility scripts
+ main.py # FastAPI entry point, lifespan, middleware
+ setup.sh # One-click environment setup
+ requirements.txt # Python dependencies
+ .env.example # Environment variable template
+
+ voice_agent/ # Core application library
+ config.py # Pydantic Settings (env var loading)
+ database.py # Async SQLAlchemy engine + session management
+ models.py # ORM: Business, User, FAQ, Call, Appointment
+ audio_converter.py # µ-law ↔ PCM conversion (G.711 algorithm)
+ gemini_client.py # Gemini Live API session handler
+ call_manager.py # Per-call lifecycle orchestrator
+ twilio_handler.py # Twilio HTTP webhooks + Media Stream WebSocket
+ twilio_client.py # Async Twilio REST wrapper (SMS, calls)
+ google_calendar.py # Google Calendar OAuth + availability + events
+ system_prompt.py # Business-specific prompt builder
+ tool_registry.py # Tool registration and dispatch system
+
+ tools/ # Individual tools (auto-register on import)
+ appointment.py # check_availability, book_appointment
+ faq.py # lookup_faq -- keyword-scored KB search
+ sms.py # send_sms_confirmation
+ transfer.py # transfer_to_human
+
+ web/ # Business owner web dashboard
+ auth.py # Session auth (login, register, logout)
+ routes.py # Dashboard routes (settings, FAQs, calls)
+ templates/ # Jinja2 HTML templates (9 pages)
+ static/ # CSS stylesheets
+
+ tests/ # Test suite
+ test_api.py # API endpoint tests
+ test_audio_converter.py# µ-law/PCM conversion edge cases
+ test_call_manager.py # Call lifecycle orchestration
+ test_gemini_client.py # Gemini session management
+ test_models.py # ORM model validation
+ test_system_prompt.py # Prompt building logic
+ test_tool_registry.py # Tool registration + dispatch
+ test_tools.py # Individual tool handlers
+
+ scripts/ # Utility scripts
 ```
 
 ---
@@ -254,14 +254,14 @@ VoiceAgent/
 | `GET` | `/dashboard/calendar/status` | Calendar connection status |
 | `GET` | `/dashboard/calendar/auth` | Google OAuth consent screen |
 | `GET` | `/dashboard/calendar/callback` | OAuth callback handler |
-| `POST` | `/twilio/incoming` | **Twilio webhook** — inbound call |
-| `POST` | `/twilio/status` | **Twilio webhook** — call status |
+| `POST` | `/twilio/incoming` | **Twilio webhook** -- inbound call |
+| `POST` | `/twilio/status` | **Twilio webhook** -- call status |
 
 ### WebSocket
 
 | Path | Description |
 |---|---|
-| `/media/{business_slug}` | Twilio Media Stream — bidirectional audio + tool calls |
+| `/media/{business_slug}` | Twilio Media Stream -- bidirectional audio + tool calls |
 
 ---
 
@@ -321,20 +321,20 @@ coverage run -m pytest tests/ && coverage report
 
 ```python
 TOOL_SCHEMA = {
-    "name": "my_tool",
-    "description": "What this tool does",
-    "parameters": {
-        "type": "OBJECT",
-        "properties": {
-            "param1": {"type": "STRING", "description": "..."},
-        },
-        "required": ["param1"],
-    },
+ "name": "my_tool",
+ "description": "What this tool does",
+ "parameters": {
+ "type": "OBJECT",
+ "properties": {
+ "param1": {"type": "STRING", "description": "..."},
+ },
+ "required": ["param1"],
+ },
 }
 
 async def handler(parameters, business_id, db_session, **kwargs):
-    # Your logic here
-    return "Result string for Gemini to speak"
+ # Your logic here
+ return "Result string for Gemini to speak"
 
 register("my_tool", TOOL_SCHEMA, handler)
 ```
@@ -365,7 +365,7 @@ Production deployments require:
 
 ## Author
 
-**Isaac Ishimwe** — Kigali, Rwanda
+**Isaac Ishimwe** -- Kigali, Rwanda
 
 - GitHub: [@IshimweIsaac](https://github.com/IshimweIsaac)
 
@@ -373,4 +373,4 @@ Production deployments require:
 
 ## License
 
-MIT — see [LICENSE](LICENSE) for details.
+MIT -- see [LICENSE](LICENSE) for details.
